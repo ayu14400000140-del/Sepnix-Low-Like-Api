@@ -1,1 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ brand }} — Secure VPS Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#000000; --bg-1:#050807; --bg-2:#0a0f0d;
+    --panel:#0d1412; --panel-2:#111a17;
+    --border:#1a2a24;
+    --green:#00ff88; --green-2:#00cc6a; --green-3:#7dffb8;
+    --red:#ff2d55; --red-2:#cc1f42;
+    --amber:#ffb000; --cyan:#00e5ff;
+    --text:#d7ffe9; --muted:#5a7a6e; --muted-2:#3a4d47;
+    --glow-green:0 0 20px rgba(0,255,136,0.4);
+    --glow-red:0 0 20px rgba(255,45,85,0.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
 
+  html,body{scroll-behavior:smooth;}
+
+  body{
+    font-family:'JetBrains Mono','Share Tech Mono',monospace;
+    background:var(--bg-0);
+    color:var(--text);min-height:100vh;overflow-x:hidden;
+    position:relative;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(0,255,136,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(0,229,255,0.04) 0%, transparent 45%),
+      linear-gradient(rgba(0,255,136,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.02) 1px, transparent 1px);
+    background-size:auto,auto,32px 32px,32px 32px;
+  }
+
+  /* Scanline overlay */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9998;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,255,136,0.02) 0px,
+      rgba(0,255,136,0.02) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    mix-blend-mode:screen;opacity:.6;
+  }
+
+  /* Moving scan bar */
+  body::before{
+    content:"";position:fixed;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--green),transparent);
+    box-shadow:0 0 20px var(--green);
+    animation:scanBar 6s linear infinite;
+    z-index:9997;pointer-events:none;opacity:.35;
+  }
+  @keyframes scanBar{
+    0%{top:-2%;}
+    100%{top:102%;}
+  }
+
+  .wrap{position:relative;z-index:2;max-width:1000px;margin:0 auto;padding:24px 16px 60px;}
+
+  /* ================= TOP BAR ================= */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 16px;margin-bottom:22px;
+    background:linear-gradient(90deg,rgba(0,255,136,0.04),rgba(0,0,0,0.6),rgba(0,255,136,0.04));
+    border:1px solid var(--border);border-radius:10px;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .topbar-left,.topbar-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .tb-item{display:flex;align-items:center;gap:6px;color:var(--muted);}
+  .tb-item b{color:var(--green);font-weight:700;}
+  .tb-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 10px var(--green);
+    animation:blink 1.4s ease-in-out infinite;
+  }
+  .tb-dot.red{background:var(--red);box-shadow:0 0 10px var(--red);}
+  .tb-dot.amber{background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  /* ================= HEADER ================= */
+  header{text-align:center;margin-bottom:26px;}
+
+  .shield{
+    width:70px;height:70px;margin:0 auto 14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;
+    background:radial-gradient(circle,rgba(0,255,136,0.15),transparent 70%);
+    border:2px solid var(--green);border-radius:16px;
+    box-shadow:var(--glow-green),inset 0 0 24px rgba(0,255,136,0.15);
+    animation:shieldPulse 2.5s ease-in-out infinite;
+    position:relative;
+  }
+  .shield::after{
+    content:"";position:absolute;inset:-8px;border-radius:20px;
+    border:1px dashed rgba(0,255,136,0.4);
+    animation:rotateRing 16s linear infinite;
+  }
+  @keyframes rotateRing{to{transform:rotate(360deg);}}
+  @keyframes shieldPulse{
+    0%,100%{box-shadow:var(--glow-green),inset 0 0 24px rgba(0,255,136,0.15);}
+    50%{box-shadow:0 0 40px rgba(0,255,136,0.7),inset 0 0 30px rgba(0,255,136,0.25);}
+  }
+
+  .logo{
+    font-family:'Orbitron',sans-serif;font-weight:900;
+    font-size:clamp(26px,6.5vw,50px);letter-spacing:4px;
+    color:var(--green);
+    text-shadow:0 0 20px rgba(0,255,136,0.6),0 0 40px rgba(0,255,136,0.3);
+    animation:logoFlicker 4s ease-in-out infinite;
+  }
+  @keyframes logoFlicker{
+    0%,100%{opacity:1;}
+    92%{opacity:1;}
+    93%{opacity:.7;}
+    94%{opacity:1;}
+    96%{opacity:.85;}
+    97%{opacity:1;}
+  }
+
+  .subtitle{
+    margin-top:8px;color:var(--muted);font-size:12px;
+    letter-spacing:6px;text-transform:uppercase;font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .badge-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 16px;border-radius:6px;
+    font-size:11px;letter-spacing:2px;font-weight:700;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  }
+  .badge.green{
+    border:1px solid var(--green);color:var(--green);
+    background:rgba(0,255,136,0.06);
+    box-shadow:0 0 16px rgba(0,255,136,0.2);
+  }
+  .badge.red{
+    border:1px solid var(--red);color:var(--red);
+    background:rgba(255,45,85,0.06);
+    box-shadow:0 0 16px rgba(255,45,85,0.2);
+  }
+  .badge.black{
+    border:1px solid var(--muted-2);color:var(--text);
+    background:rgba(255,255,255,0.02);
+  }
+  .badge .dot{
+    width:6px;height:6px;border-radius:50%;background:currentColor;
+    box-shadow:0 0 8px currentColor;
+    animation:blink 1.4s ease-in-out infinite;
+  }
+
+  /* ================= NODE STATUS ================= */
+  .nodes{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+    margin-top:20px;
+  }
+  @media (max-width:520px){.nodes{grid-template-columns:1fr;}}
+  .node{
+    padding:12px 14px;border-radius:8px;
+    background:linear-gradient(180deg,rgba(13,20,18,0.95),rgba(5,8,7,0.95));
+    border:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;
+    display:flex;justify-content:space-between;align-items:center;
+    transition:.3s;position:relative;overflow:hidden;
+  }
+  .node::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:var(--green);box-shadow:0 0 8px var(--green);
+  }
+  .node.offline::before{background:var(--red);box-shadow:0 0 8px var(--red);}
+  .node.busy::before{background:var(--amber);box-shadow:0 0 8px var(--amber);}
+  .node:hover{border-color:rgba(0,255,136,0.4);transform:translateY(-1px);}
+  .node-name{
+    font-size:11px;font-weight:700;letter-spacing:2px;
+    color:var(--text);text-transform:uppercase;
+  }
+  .node-status{
+    display:flex;align-items:center;gap:6px;
+    font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--green);font-weight:700;
+  }
+  .node-status .led{
+    width:6px;height:6px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 8px var(--green);
+    animation:blink 1.2s ease-in-out infinite;
+  }
+  .node.offline .node-status{color:var(--red);}
+  .node.offline .node-status .led{background:var(--red);box-shadow:0 0 8px var(--red);}
+  .node.busy .node-status{color:var(--amber);}
+  .node.busy .node-status .led{background:var(--amber);box-shadow:0 0 8px var(--amber);}
+
+  /* ================= CARD ================= */
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,rgba(13,20,18,0.97),rgba(5,8,7,0.97));
+    border:1px solid var(--border);border-radius:12px;
+    padding:22px 20px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.7),inset 0 0 30px rgba(0,255,136,0.02);
+    overflow:hidden;
+  }
+  .card + .card{margin-top:18px;}
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--green),transparent);
+    opacity:.7;
+  }
+
+  .card-title{
+    font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;
+    letter-spacing:4px;color:var(--green);text-transform:uppercase;
+    margin-bottom:20px;display:flex;align-items:center;gap:10px;
+  }
+  .card-title .idx{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:4px;
+    background:rgba(0,255,136,0.1);border:1px solid var(--green);
+    font-size:10px;color:var(--green);font-family:'JetBrains Mono',monospace;
+  }
+  .card-title::after{
+    content:"";height:1px;flex:1;
+    background:linear-gradient(90deg,rgba(0,255,136,0.3),transparent);
+  }
+
+  label{
+    display:block;font-weight:600;font-size:11px;letter-spacing:2.5px;
+    text-transform:uppercase;color:var(--green);margin-bottom:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  label::before{content:"> ";color:var(--muted);}
+
+  .input-wrap{position:relative;}
+  .input-wrap .icon{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    font-size:15px;opacity:.7;pointer-events:none;color:var(--green);
+  }
+  input,select{
+    width:100%;padding:13px 14px 13px 42px;
+    background:rgba(0,0,0,0.6);
+    border:1px solid var(--border);border-radius:6px;
+    color:var(--text);font-size:14px;
+    font-family:'JetBrains Mono',monospace;font-weight:500;
+    outline:none;transition:.25s;letter-spacing:1px;
+  }
+  input::placeholder{color:var(--muted-2);}
+  input:focus,select:focus{
+    border-color:var(--green);
+    box-shadow:0 0 0 2px rgba(0,255,136,0.15),0 0 20px rgba(0,255,136,0.15);
+    background:rgba(0,255,136,0.02);
+  }
+
+  .field + .field{margin-top:16px;}
+
+  /* Region chips */
+  .regions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
+  @media (max-width:520px){.regions{grid-template-columns:repeat(2,1fr);}}
+  .chip{
+    text-align:center;padding:11px 6px;
+    border-radius:6px;border:1px solid var(--border);
+    background:rgba(0,0,0,0.4);color:var(--muted);font-weight:600;
+    letter-spacing:1.5px;cursor:pointer;transition:.25s;user-select:none;font-size:12px;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+    position:relative;
+  }
+  .chip:hover{color:var(--green);border-color:var(--green);background:rgba(0,255,136,0.04);}
+  .chip.active{
+    color:#000;border-color:var(--green);
+    background:linear-gradient(180deg,var(--green),var(--green-2));
+    box-shadow:0 0 20px rgba(0,255,136,0.5);
+    font-weight:700;
+  }
+  .chip .flag{margin-right:5px;}
+
+  /* Button */
+  .btn{
+    width:100%;margin-top:22px;padding:16px;border:none;border-radius:8px;
+    font-family:'Orbitron',sans-serif;font-weight:900;font-size:15px;letter-spacing:4px;
+    color:#001a0d;
+    background:linear-gradient(180deg,var(--green),var(--green-2));
+    cursor:pointer;transition:.25s;
+    box-shadow:0 0 24px rgba(0,255,136,0.4),0 8px 24px rgba(0,0,0,0.5);
+    position:relative;overflow:hidden;text-transform:uppercase;
+  }
+  .btn::after{
+    content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);
+    transition:.6s;
+  }
+  .btn:hover::after{left:100%;}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(0,255,136,0.7),0 12px 32px rgba(0,0,0,0.6);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{opacity:.7;cursor:not-allowed;transform:none;}
+  .btn .spinner{
+    display:inline-block;width:14px;height:14px;
+    border:2px solid rgba(0,0,0,0.25);border-top-color:#001a0d;border-radius:50%;
+    animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ================= TERMINAL LOG ================= */
+  .terminal{
+    margin-top:18px;border-radius:8px;overflow:hidden;
+    border:1px solid var(--border);background:#000;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .terminal-head{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 12px;background:linear-gradient(180deg,#0d1412,#050807);
+    border-bottom:1px solid var(--border);
+    font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
+  }
+  .terminal-head .dots{display:flex;gap:5px;}
+  .terminal-head .dots span{
+    width:9px;height:9px;border-radius:50%;display:inline-block;
+  }
+  .terminal-head .dots .r{background:#ff5f56;}
+  .terminal-head .dots .y{background:#ffbd2e;}
+  .terminal-head .dots .g{background:#27c93f;}
+  .terminal-body{
+    padding:12px 14px;font-size:11.5px;line-height:1.7;
+    color:var(--green);max-height:200px;overflow-y:auto;
+    background:radial-gradient(circle at 50% 0%,rgba(0,255,136,0.04),transparent 70%);
+  }
+  .terminal-body::-webkit-scrollbar{width:6px;}
+  .terminal-body::-webkit-scrollbar-track{background:#000;}
+  .terminal-body::-webkit-scrollbar-thumb{background:var(--green-2);border-radius:3px;}
+  .log-line{display:flex;gap:8px;white-space:pre-wrap;word-break:break-all;}
+  .log-line .ts{color:var(--muted-2);}
+  .log-line .ok{color:var(--green);}
+  .log-line .err{color:var(--red);}
+  .log-line .warn{color:var(--amber);}
+  .log-line .info{color:var(--cyan);}
+  .cursor{
+    display:inline-block;width:7px;height:12px;background:var(--green);
+    vertical-align:middle;animation:blink 1s steps(2) infinite;
+  }
+
+  /* ================= RESULT ================= */
+  .result{display:none;}
+  .result.show{display:block;animation:fadeUp .4s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+  .result-status{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;border-radius:8px;margin-bottom:18px;
+    border:1px solid var(--green);background:rgba(0,255,136,0.05);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .result-status.fail{
+    border-color:var(--red);background:rgba(255,45,85,0.05);
+  }
+  .result-status .left{display:flex;align-items:center;gap:12px;}
+  .result-status .icon-box{
+    width:40px;height:40px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    background:rgba(0,255,136,0.1);border:1px solid var(--green);
+    box-shadow:0 0 16px rgba(0,255,136,0.3);
+  }
+  .result-status.fail .icon-box{
+    background:rgba(255,45,85,0.1);border-color:var(--red);
+    box-shadow:0 0 16px rgba(255,45,85,0.3);
+  }
+  .result-status .txt-main{
+    font-size:13px;font-weight:700;letter-spacing:2px;
+    color:var(--green);text-transform:uppercase;
+  }
+  .result-status.fail .txt-main{color:var(--red);}
+  .result-status .txt-sub{
+    font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-top:3px;
+  }
+  .result-status .badge-code{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    padding:5px 10px;border-radius:4px;
+    background:rgba(0,0,0,0.5);border:1px solid var(--border);
+    color:var(--green);letter-spacing:1.5px;
+  }
+  .result-status.fail .badge-code{color:var(--red);}
+
+  .player-header{
+    text-align:center;padding:20px 0;
+    border-bottom:1px dashed rgba(0,255,136,0.2);margin-bottom:20px;
+  }
+  .player-avatar{
+    width:74px;height:74px;border-radius:50%;margin:0 auto 12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;
+    background:radial-gradient(circle,rgba(0,255,136,0.15),rgba(0,0,0,0.6));
+    border:2px solid var(--green);
+    box-shadow:0 0 30px rgba(0,255,136,0.5);
+    position:relative;
+    animation:avatarGlow 2.5s ease-in-out infinite;
+  }
+  @keyframes avatarGlow{
+    0%,100%{box-shadow:0 0 30px rgba(0,255,136,0.5);}
+    50%{box-shadow:0 0 50px rgba(0,255,136,0.9);}
+  }
+  .player-avatar::after{
+    content:"";position:absolute;inset:-6px;border-radius:50%;
+    border:1px dashed rgba(0,255,136,0.5);
+    animation:rotateRing 12s linear infinite;
+  }
+  .player-name{
+    font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;
+    color:var(--green);text-shadow:0 0 16px rgba(0,255,136,0.5);
+    word-break:break-word;letter-spacing:1.5px;
+  }
+  .player-uid{
+    color:var(--muted);font-size:12px;letter-spacing:2px;margin-top:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  @media (max-width:480px){.stats{grid-template-columns:1fr;}}
+
+  .stat{
+    padding:14px 16px;border-radius:8px;
+    background:linear-gradient(180deg,rgba(13,20,18,0.9),rgba(5,8,7,0.9));
+    border:1px solid var(--border);position:relative;overflow:hidden;
+    transition:.25s;font-family:'JetBrains Mono',monospace;
+  }
+  .stat:hover{transform:translateY(-2px);border-color:rgba(0,255,136,0.4);}
+  .stat::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:var(--green);
+  }
+  .stat .k{
+    font-size:10px;letter-spacing:2px;color:var(--muted);
+    text-transform:uppercase;font-weight:600;
+  }
+  .stat .v{
+    margin-top:8px;font-family:'Orbitron',sans-serif;font-size:20px;
+    font-weight:900;color:var(--text);letter-spacing:1px;
+  }
+  .stat.before::before{background:#ff6b6b;}
+  .stat.before .v{color:#ff6b6b;}
+  .stat.after::before{background:var(--cyan);}
+  .stat.after .v{color:var(--cyan);}
+  .stat.given::before{background:var(--green);}
+  .stat.given .v{color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.4);}
+  .stat.gift::before{background:var(--amber);}
+  .stat.gift .v{color:var(--amber);}
+  .stat.live::before{background:var(--green);}
+  .stat.live .v{color:var(--green);}
+
+  .meta-row{
+    display:flex;justify-content:space-between;margin-top:16px;
+    font-size:10.5px;color:var(--muted);letter-spacing:1.5px;flex-wrap:wrap;gap:10px;
+    padding-top:14px;border-top:1px dashed rgba(0,255,136,0.15);
+    text-transform:uppercase;font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .meta-row b{color:var(--green);}
+
+  .error-box{
+    padding:14px 16px;border-radius:8px;
+    background:rgba(255,45,85,0.08);
+    border:1px solid rgba(255,45,85,0.5);
+    color:#ffb3c1;font-weight:600;
+    display:flex;align-items:flex-start;gap:12px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    box-shadow:0 0 20px rgba(255,45,85,0.2);
+  }
+  .error-box .icon{font-size:20px;line-height:1;}
+
+  /* ================= FOOTER ================= */
+  footer{
+    text-align:center;margin-top:36px;color:var(--muted);
+    font-size:11px;letter-spacing:2px;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  }
+  footer .brand-line{
+    font-family:'Orbitron',sans-serif;font-weight:700;
+    letter-spacing:5px;color:var(--green);
+    margin-bottom:10px;font-size:13px;
+    text-shadow:0 0 16px rgba(0,255,136,0.4);
+  }
+  footer a{
+    color:var(--green);text-decoration:none;transition:.2s;
+    border-bottom:1px dashed transparent;
+  }
+  footer a:hover{
+    text-shadow:0 0 12px var(--green);
+    border-bottom-color:var(--green);
+  }
+  footer .owner-line{margin-top:8px;opacity:.7;font-size:10px;letter-spacing:1.5px;}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+    background:linear-gradient(180deg,#0d1412,#050807);
+    color:var(--green);padding:12px 22px;border-radius:8px;
+    font-weight:700;letter-spacing:2px;font-size:11px;
+    box-shadow:0 0 30px rgba(0,255,136,0.4),0 10px 30px rgba(0,0,0,0.6);
+    border:1px solid var(--green);
+    z-index:9999;opacity:0;transition:.4s;pointer-events:none;
+    text-transform:uppercase;font-family:'JetBrains Mono',monospace;
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  .toast.error{border-color:var(--red);color:var(--red);box-shadow:0 0 30px rgba(255,45,85,0.4);}
+  .toast .led{
+    width:6px;height:6px;border-radius:50%;background:currentColor;
+    box-shadow:0 0 8px currentColor;animation:blink 1.2s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="tb-item"><span class="tb-dot"></span> <b>ONLINE</b></div>
+      <div class="tb-item">UPTIME <b>99.9%</b></div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-item" id="tbClock">--:--:--</div>
+      <div class="tb-item">SECURE <b>SSL</b></div>
+    </div>
+  </div>
+
+  <header>
+    <div class="shield">🛡️</div>
+    <div class="logo">{{ brand }}</div>
+    <div class="subtitle">Encrypted Like Service Node</div>
+
+    <div class="badge-row">
+      <div class="badge green"><span class="dot"></span> SYSTEM ONLINE</div>
+      <div class="badge black"><span class="dot"></span> {{ badge }}</div>
+      <div class="badge red"><span class="dot"></span> ANTI-BLOCK v3</div>
+    </div>
+
+    <!-- NODE STATUS -->
+    <div class="nodes">
+      <div class="node" data-node="01">
+        <div class="node-name">NODE-01</div>
+        <div class="node-status"><span class="led"></span> ONLINE</div>
+      </div>
+      <div class="node" data-node="02">
+        <div class="node-name">NODE-02</div>
+        <div class="node-status"><span class="led"></span> ONLINE</div>
+      </div>
+      <div class="node" data-node="03">
+        <div class="node-name">NODE-03</div>
+        <div class="node-status"><span class="led"></span> ONLINE</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="card-title"><span class="idx">01</span> Target Configuration</div>
+
+    <div class="field">
+      <label>Player UID</label>
+      <div class="input-wrap">
+        <span class="icon">🎯</span>
+        <input id="uid" type="text" inputmode="numeric" placeholder="Enter target player UID" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>API Access Key</label>
+      <div class="input-wrap">
+        <span class="icon">🔐</span>
+        <input id="key" type="text" placeholder="Enter your secure access key" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Select Region</label>
+      <div class="regions" id="regions">
+        <div class="chip active" data-region="BD"><span class="flag">🇧🇩</span> BD</div>
+        <div class="chip" data-region="IND"><span class="flag">🇮🇳</span> IND</div>
+        <div class="chip" data-region="BR"><span class="flag">🇧🇷</span> BR</div>
+        <div class="chip" data-region="US"><span class="flag">🇺🇸</span> US</div>
+        <div class="chip" data-region="SAC"><span class="flag">🌎</span> SAC</div>
+        <div class="chip" data-region="NA"><span class="flag">🌐</span> NA</div>
+      </div>
+    </div>
+
+    <button class="btn" id="submitBtn">▶ EXECUTE LIKE PROTOCOL</button>
+  </div>
+
+  <!-- LIVE LOG CARD -->
+  <div class="card">
+    <div class="card-title"><span class="idx">02</span> Live System Log</div>
+    <div class="terminal">
+      <div class="terminal-head">
+        <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div>root@{{ brand|lower }}-node: ~</div>
+      </div>
+      <div class="terminal-body" id="terminalBody">
+        <div class="log-line"><span class="ts">[--:--:--]</span><span class="info">system ready — awaiting instruction</span></div>
+        <div class="log-line"><span class="ts">[--:--:--]</span><span>nodes: <span class="ok">3 online</span> / 0 offline</span></div>
+        <div class="log-line"><span class="ts">[--:--:--]</span><span class="ok">✔ secure tunnel established</span></div>
+        <div class="log-line"><span class="ts">[--:--:--]</span><span class="info">press EXECUTE to begin<span class="cursor"></span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="card result" id="resultCard">
+    <div class="card-title"><span class="idx">03</span> Execution Report</div>
+    <div id="resultBody"></div>
+  </div>
+
+  <footer>
+    <div class="brand-line">◈ {{ brand }} • SECURE NODE ◈</div>
+    <div>Powered by <b style="color:var(--green)">{{ dev }}</b> • <a href="https://t.me/{{ tg.lstrip('@') }}" target="_blank">{{ tg }}</a></div>
+    <div class="owner-line">Owner: {{ owner.replace('TG: ','') }}</div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"><span class="led"></span><span id="toastMsg">Ready</span></div>
+
+<script>
+const API_BASE = "";
+
+let selectedRegion = "BD";
+const chips = document.querySelectorAll(".chip");
+chips.forEach(c => {
+  c.addEventListener("click", () => {
+    chips.forEach(x => x.classList.remove("active"));
+    c.classList.add("active");
+    selectedRegion = c.dataset.region;
+  });
+});
+
+const btn = document.getElementById("submitBtn");
+const resultCard = document.getElementById("resultCard");
+const resultBody = document.getElementById("resultBody");
+const toastEl = document.getElementById("toast");
+const toastMsg = document.getElementById("toastMsg");
+const terminalBody = document.getElementById("terminalBody");
+
+/* ---------- Clock ---------- */
+function tickClock(){
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  const ss = String(d.getSeconds()).padStart(2,"0");
+  document.getElementById("tbClock").textContent = `${hh}:${mm}:${ss} UTC`;
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ---------- Terminal Logger ---------- */
+function nowStamp(){
+  const d = new Date();
+  return `[${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}]`;
+}
+function logLine(msg, cls="info"){
+  const line = document.createElement("div");
+  line.className = "log-line";
+  line.innerHTML = `<span class="ts">${nowStamp()}</span><span class="${cls}">${msg}</span>`;
+  terminalBody.appendChild(line);
+  terminalBody.scrollTop = terminalBody.scrollHeight;
+  // keep last 60 lines
+  while(terminalBody.children.length > 60) terminalBody.removeChild(terminalBody.firstChild);
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg, isErr=false){
+  toastMsg.textContent = msg;
+  toastEl.classList.toggle("error", isErr);
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove("show"), 2800);
+}
+
+/* ---------- Node animation while processing ---------- */
+function setNodesBusy(on){
+  document.querySelectorAll(".node").forEach(n=>{
+    n.classList.toggle("busy", on);
+    const st = n.querySelector(".node-status");
+    if(on){ st.innerHTML = '<span class="led"></span> BUSY'; }
+    else  { st.innerHTML = '<span class="led"></span> ONLINE'; }
+  });
+}
+
+/* ---------- Submit ---------- */
+btn.addEventListener("click", async () => {
+  const uid = document.getElementById("uid").value.trim();
+  const key = document.getElementById("key").value.trim();
+
+  if (!uid) { toast("⚠ Enter Player UID", true); logLine("✖ uid missing", "err"); return; }
+  if (!/^\d+$/.test(uid)) { toast("⚠ UID must be numeric", true); logLine("✖ invalid uid format", "err"); return; }
+  if (!key) { toast("⚠ Enter Access Key", true); logLine("✖ access key missing", "err"); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> EXECUTING...';
+  resultCard.classList.remove("show");
+  setNodesBusy(true);
+
+  logLine(`▶ target uid=${uid} region=${selectedRegion}`, "info");
+  logLine(`▶ initiating multi-node handshake...`, "warn");
+  logLine(`▶ requesting secure tokens from cluster...`, "warn");
+
+  try {
+    const url = `${API_BASE}/like?uid=${encodeURIComponent(uid)}&server_name=${encodeURIComponent(selectedRegion)}&key=${encodeURIComponent(key)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    setNodesBusy(false);
+
+    if (!resp.ok || data.error) {
+      const errMsg = data.error || `Request failed (${resp.status})`;
+      logLine(`✖ ${errMsg}`, "err");
+      showError(errMsg);
+      toast("✖ " + errMsg, true);
+      return;
+    }
+
+    logLine(`✔ accounts loaded: ${data.accounts_loaded ?? 0}`, "ok");
+    logLine(`✔ tokens generated: ${data.tokens_generated ?? 0}`, "ok");
+    logLine(`✔ like burst dispatched`, "ok");
+    if((data.LikesGivenByAPI ?? 0) > 0){
+      logLine(`✔ +${data.LikesGivenByAPI} likes delivered`, "ok");
+    } else {
+      logLine(`⚠ no likes given this cycle`, "warn");
+    }
+    showResult(data);
+    if (data.status === 1) toast(`✔ +${data.LikesGivenByAPI || 0} likes delivered`);
+    else toast("⚠ No likes given", true);
+  } catch (e) {
+    setNodesBusy(false);
+    logLine(`✖ network error: ${e.message}`, "err");
+    showError("Network error: " + e.message);
+    toast("✖ Network error", true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "▶ EXECUTE LIKE PROTOCOL";
+  }
+});
+
+function showError(msg) {
+  resultBody.innerHTML = `
+    <div class="error-box">
+      <span class="icon">⛔</span>
+      <div>
+        <div style="font-weight:700;letter-spacing:2px;margin-bottom:4px;">EXECUTION FAILED</div>
+        <div style="opacity:.85;">${escapeHtml(msg)}</div>
+      </div>
+    </div>`;
+  resultCard.classList.add("show");
+  resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function showResult(d) {
+  const ok = d.status === 1;
+  const statusBlock = ok
+    ? `<div class="result-status">
+         <div class="left">
+           <div class="icon-box">✔</div>
+           <div>
+             <div class="txt-main">Execution Successful</div>
+             <div class="txt-sub">likes delivered to target</div>
+           </div>
+         </div>
+         <div class="badge-code">CODE 200 OK</div>
+       </div>`
+    : `<div class="result-status fail">
+         <div class="left">
+           <div class="icon-box">✖</div>
+           <div>
+             <div class="txt-main">No Likes Given</div>
+             <div class="txt-sub">target may be on cooldown</div>
+           </div>
+         </div>
+         <div class="badge-code">CODE 204 EMPTY</div>
+       </div>`;
+
+  resultBody.innerHTML = `
+    ${statusBlock}
+
+    <div class="player-header">
+      <div class="player-avatar">🎮</div>
+      <div class="player-name">${escapeHtml(d.PlayerNickname || "Unknown")}</div>
+      <div class="player-uid">UID: ${escapeHtml(String(d.UID || ""))}</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat before">
+        <div class="k">Likes Before</div>
+        <div class="v">${d.LikesbeforeCommand ?? 0}</div>
+      </div>
+      <div class="stat after">
+        <div class="k">Likes After</div>
+        <div class="v">${d.LikesafterCommand ?? 0}</div>
+      </div>
+      <div class="stat given">
+        <div class="k">Likes Delivered</div>
+        <div class="v">+${d.LikesGivenByAPI ?? 0}</div>
+      </div>
+      <div class="stat gift">
+        <div class="k">Gift Count</div>
+        <div class="v">🎁 ${d.GiftCount ?? 0}</div>
+      </div>
+      <div class="stat live">
+        <div class="k">Accounts Loaded</div>
+        <div class="v">${d.accounts_loaded ?? 0}</div>
+      </div>
+      <div class="stat live">
+        <div class="k">Tokens Generated</div>
+        <div class="v">${d.tokens_generated ?? 0}</div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <span>REGION: <b>${escapeHtml(d.server_name || "")}</b></span>
+      <span>OWNER: <b>${escapeHtml(d.Owner || "")}</b></span>
+      <span>NODE: <b>CLUSTER-01</b></span>
+    </div>
+  `;
+  resultCard.classList.add("show");
+  resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+/* ---------- Keyboard ---------- */
+document.getElementById("uid").addEventListener("keypress", e => {
+  if (e.key === "Enter") document.getElementById("key").focus();
+});
+document.getElementById("key").addEventListener("keypress", e => {
+  if (e.key === "Enter") btn.click();
+});
+</script>
+</body>
+</html>
