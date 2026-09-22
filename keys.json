@@ -1,0 +1,10 @@
+{
+  "ALLOWED_KEYS": {
+    "Sepnix": 9999
+  },
+  "ADMIN_KEYS": [
+    "Sepnix"
+  ],
+  "RESET_TZ": "Asia/Dhaka"
+}
+
